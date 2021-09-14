@@ -4,6 +4,6 @@ cmake_minimum_required(VERSION 2.8) # Проверка версии CMake.
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-add_executable(server server.c)		# Создает исполняемый файл с именем main
-					# из исходника main.cpp
+
+add_executable(server server.c clientsQueue.c )		# 
 target_link_libraries(server PRIVATE Threads::Threads)
