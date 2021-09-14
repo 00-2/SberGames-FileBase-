@@ -8,10 +8,11 @@
 #include <limits.h>
 #include <pthread.h>
 #include "clientsQueue.h"
+#include "workWithFiles.h"
 
 int SERVERPORT = 8989;
 char* path = "/data"; 
-#define BUFSIZE 4096
+#define BUFSIZE sizeof(command_t)
 #define SOCKETERROR (-1)
 #define SERVER_BACKLOG 100
 #define THREAD_POOL_SIZE 20
@@ -143,21 +144,20 @@ void * thread_function(void* arg) {
 void * handle_connection(void* p_client_socket) {
     int client_socket = *((int*)p_client_socket);
     free(p_client_socket);
-    char buffer[BUFSIZE];
     size_t bytes_read;
     int msgsize = 0;
     char actualpath[PATH_MAX+1];
-
-    while((bytes_read = read(client_socket, buffer+msgsize,sizeof(buffer)-msgsize-1)) > 0 ) {
-        msgsize += bytes_read;
-        if(msgsize>BUFSIZE-1 || buffer[msgsize-1] == '\n') break;
-    }
-    check(bytes_read, "Recieve error!");
-    buffer[msgsize-1] = 0;
     
-    printf("REQUEST: %s\n", buffer);
     
-    write(client_socket,buffer, msgsize);
+    command_t command;
+    //получение структуры неправильно.
+    //так считалась одна из структур
+    printf("%ld",recv(client_socket, &command, 1, 0));
+    
+    printf("REQUEST:%d\n", command.condition);
+    //printf("REQUEST: \n\tcommand:%s\n\tSizeOfPATH:%d\n\tPATH:%s\n",command.condition?"Create":"Delete", command.path_size ,command.path);
+    
+    // write(client_socket,buffer, msgsize);
     close(client_socket);
     printf("Closing connection\n");
     return NULL;
