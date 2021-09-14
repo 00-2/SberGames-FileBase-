@@ -9,7 +9,8 @@
 #include <pthread.h>
 #include "clientsQueue.h"
 
-#define SERVERPORT 8989
+int SERVERPORT = 8989;
+char* path = "/data"; 
 #define BUFSIZE 4096
 #define SOCKETERROR (-1)
 #define SERVER_BACKLOG 100
@@ -30,6 +31,19 @@ int check(int exp, const char *msg);
 void * thread_function(void* arg);
 
 int main(int argc, char ** argv){
+
+    //get port and path from argv
+    if (argc > 1)//if we give arguments
+       {
+           SERVERPORT = atoi(argv[1]);
+           path = argv[2];
+       }
+    
+    printf("PORT:%d\nPATH:%s\n",
+            SERVERPORT,
+            path
+        );    
+    
     int server_socket, client_socket, addr_size;
     SA_IN server_addr, client_addr;
 
