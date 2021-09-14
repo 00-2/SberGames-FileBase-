@@ -16,7 +16,7 @@
 typedef struct sockaddr_in SA_IN;
 typedef struct sockaddr SA;
 
-void handle_connection(int client_socket);
+void * handle_connection(void* p_client_socket);
 int check(int exp, const char *msg);
 
 int main(int argc, char ** argv){
@@ -46,8 +46,11 @@ int main(int argc, char ** argv){
                 "Accept Failed!");
         printf("Connected!\n");
         //работаем с клиентом
-        handle_connection(client_socket);
+        pthread_t t;
 
+        int*pclient = malloc(sizeof(int));
+        *pclient = client_socket;
+        pthread_create(&t, NULL, handle_connection, pclient);
     } //while
 
     return 0;
@@ -61,7 +64,9 @@ int check(int exp, const char *msg){
     return exp;
 }
 
-void handle_connection(int client_socket) {
+void * handle_connection(void* p_client_socket) {
+    int client_socket = *((int*)p_client_socket);
+    free(p_client_socket);
     char buffer[BUFSIZE];
     size_t bytes_read;
     int msgsize = 0;
@@ -79,4 +84,5 @@ void handle_connection(int client_socket) {
     write(client_socket,buffer, msgsize);
     close(client_socket);
     printf("Closing connection\n");
+    return NULL;
 }
