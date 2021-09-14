@@ -150,11 +150,21 @@ void * handle_connection(void* p_client_socket) {
     
     
     command_t command;
-    //получение структуры неправильно.
-    //так считалась одна из структур
-    printf("%ld",recv(client_socket, &command, 1, 0));
+    //получение структуры неправильно, но так работает
+    recv(client_socket, &command.path_size,2, 0);
+    recv(client_socket, &command.condition,1, 0);
+    char * tmp = malloc(sizeof(char)*command.path_size);
+    recv(client_socket, tmp,command.path_size, 0);
     
-    printf("REQUEST:%d\n", command.condition);
+    command.path = malloc(sizeof(char)*command.path_size);
+    memcpy(command.path,tmp,command.path_size);
+
+    printf("REQUEST:\n\tcondition:%d\n\tsizeOfPath:%d\n\tPath:%s\n",
+                                    command.condition,
+                                    command.path_size,
+                                    command.path
+                                    );
+    
     //printf("REQUEST: \n\tcommand:%s\n\tSizeOfPATH:%d\n\tPATH:%s\n",command.condition?"Create":"Delete", command.path_size ,command.path);
     
     // write(client_socket,buffer, msgsize);

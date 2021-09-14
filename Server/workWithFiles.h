@@ -8,9 +8,9 @@ typedef enum Bool {
 
 struct command/*struct, which use server to contain clients commands*/
 {
+    unsigned short path_size;
     Bool condition;//1 for create, 0 for delete
-    //unsigned short path_size;
-    //char path[200];//contains dir+"/"+filename
+    char *path;//contains dir+"/"+filename
 };
 typedef struct command command_t;
 
