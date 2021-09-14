@@ -1,9 +1,14 @@
 #ifndef WORKWITHFILES_H_
 #define WORKWITHFILES_H_
 
+typedef enum Bool {
+    FALSE,
+    TRUE
+} Bool;
+
 struct command/*struct, which use server to contain clients commands*/
 {
-    bool condition;//1 for create, 0 for delete
+    Bool condition;//1 for create, 0 for delete
     char * path;//contains dir+"/"+filename
 };
 typedef struct command command_t;
