@@ -159,15 +159,8 @@ void * handle_connection(void* p_client_socket) {
     command.path = malloc(sizeof(char)*command.path_size);
     memcpy(command.path,tmp,command.path_size);
 
-    printf("REQUEST:\n\tcondition:%d\n\tsizeOfPath:%d\n\tPath:%s\n",
-                                    command.condition,
-                                    command.path_size,
-                                    command.path
-                                    );
-    
-    //printf("REQUEST: \n\tcommand:%s\n\tSizeOfPATH:%d\n\tPATH:%s\n",command.condition?"Create":"Delete", command.path_size ,command.path);
-    
-    // write(client_socket,buffer, msgsize);
+    printf("REQUEST: \n\tcommand:%s\n\tSizeOfPATH:%d\n\tPATH:%s\n",command.condition?"Create":"Delete", command.path_size ,command.path);
+    parse_command(command);
     close(client_socket);
     printf("Closing connection\n");
     return NULL;
