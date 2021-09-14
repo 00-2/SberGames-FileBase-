@@ -4,14 +4,17 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <stdbool.h>
 #include <limits.h>
 #include <pthread.h>
+#include <stdbool.h>
+#include <sys/stat.h>
 #include "clientsQueue.h"
+#include "workWithFiles.h"
+
 
 int SERVERPORT = 8989;
-char* path = "/data"; 
-#define BUFSIZE 4096
+char* path = "../data";
+#define BUFSIZE sizeof(command_t)
 #define SOCKETERROR (-1)
 #define SERVER_BACKLOG 100
 #define THREAD_POOL_SIZE 20
@@ -38,7 +41,11 @@ int main(int argc, char ** argv){
            SERVERPORT = atoi(argv[1]);
            path = argv[2];
        }
-    
+    //if create
+    if (!mkdir(path,S_IRWXU)){
+        printf("Dir created:%s\n",path);
+    }
+
     printf("PORT:%d\nPATH:%s\n",
             SERVERPORT,
             path
@@ -143,21 +150,28 @@ void * thread_function(void* arg) {
 void * handle_connection(void* p_client_socket) {
     int client_socket = *((int*)p_client_socket);
     free(p_client_socket);
-    char buffer[BUFSIZE];
     size_t bytes_read;
     int msgsize = 0;
     char actualpath[PATH_MAX+1];
 
-    while((bytes_read = read(client_socket, buffer+msgsize,sizeof(buffer)-msgsize-1)) > 0 ) {
-        msgsize += bytes_read;
-        if(msgsize>BUFSIZE-1 || buffer[msgsize-1] == '\n') break;
-    }
-    check(bytes_read, "Recieve error!");
-    buffer[msgsize-1] = 0;
-    
-    printf("REQUEST: %s\n", buffer);
-    
-    write(client_socket,buffer, msgsize);
+    command_t command;
+    //получение структуры неправильно, но так работает
+    recv(client_socket, &command.path_size,2, 0);
+    recv(client_socket, &command.condition,1, 0);
+    char * tmp = malloc(sizeof(char)*command.path_size);
+    recv(client_socket, tmp,command.path_size, 0);   
+    command.path = malloc(sizeof(char)*command.path_size);
+    memcpy(command.path,tmp,command.path_size);
+
+    //добавление к path path-директории
+    char* buffer = malloc(strlen(path) + strlen(command.path) + 1 + 1);
+    strcpy(buffer, path);
+    strcat(buffer, "/");
+    strcat(buffer, command.path);
+    command.path = buffer;
+    printf("REQUEST: \n\tcommand:%s\n\tSizeOfPATH:%d\n\tPATH:%s\n",command.condition?"Create":"Delete", command.path_size ,command.path);
+    parse_command(command);
+    free(buffer);
     close(client_socket);
     printf("Closing connection\n");
     return NULL;
