@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-
 void parse_command(command_t command) {
     if (command.condition){ //try to create file
         create_file(command.path);
